@@ -33,10 +33,10 @@
 ```mermaid
 graph LR
     subgraph Browser ["Рабочее место инженера (Браузер)"]
-        UI["Web UI: http://10.15.26.15:8080<br/>HTML5 / Dark Glassmorphism / Chart.js"]
+        UI["Web UI: http://&lt;IP_СЕРВЕРА&gt;:8080<br/>HTML5 / Dark Glassmorphism / Chart.js"]
     end
 
-    subgraph Host ["Сервер t-rex (Ubuntu 22.04 LTS)"]
+    subgraph Host ["Сервер TRex (Ubuntu 22.04 LTS)"]
         subgraph WebService ["Служба: trex-webui.service"]
             Flask["Flask Backend (app.py)<br/>Security: Login PAM, CSRF, Rate-limit"]
             Cache["Кэш телеметрии (500 мс)"]
@@ -121,15 +121,15 @@ sudo systemctl daemon-reload && sudo systemctl enable --now trex-webui.service
 
 ## 4. Подробное описание веб-интерфейса (Каждый элемент управления)
 
-Вход в панель управления: **`http://10.15.26.15:8080/`**.  
-Авторизация осуществляется логином и паролем системного пользователя ОС (например, `user` / `xxXX1234`).
+Вход в панель управления: **`http://<IP_СЕРВЕРА>:8080/`**.  
+Авторизация осуществляется логином и паролем системного пользователя ОС Linux на сервере.
 
 ---
 
 ### 4.1. Верхняя панель (Top Bar) и статус-индикаторы
 
 ```
-[⚡ TRex Studio L7]  [🕒 15:45:02 | 🌐 10.15.26.15]  [📊 Дашборд] [🕵️‍♂️ DPI] [📑 ПМИ] [⚙️ Сеть] [👥 Пользователи]  [🟢 Активен (CPU: 2.1%)] [👤 user] [Выйти]
+[⚡ TRex Studio L7]  [🕒 15:45:02 | 🌐 <IP_СЕРВЕРА>]  [📊 Дашборд] [🕵️‍♂️ DPI] [📑 ПМИ] [⚙️ Сеть] [👥 Пользователи]  [🟢 Активен (CPU: 2.1%)] [👤 <пользователь>] [Выйти]
 ```
 
 * **Логотип «⚡ TRex Studio L7»**: Название комплекса тестирования прикладного трафика.
@@ -288,7 +288,7 @@ sudo systemctl daemon-reload && sudo systemctl enable --now trex-webui.service
 
 ```mermaid
 graph LR
-    subgraph TRexHost ["Генератор трафика t-rex (10.15.26.15)"]
+    subgraph TRexHost ["Генератор трафика TRex (<IP_СЕРВЕРА>)"]
         P0["Port 0 (Client Emulation)<br/>IP: 192.168.1.2/24<br/>Client Pool: 16.0.0.0/8"]
         P1["Port 1 (Server Emulation)<br/>IP: 172.10.1.2/24<br/>Server Pool: 48.0.0.0/8"]
     end
@@ -308,7 +308,7 @@ graph LR
 #### Матрица адресации стенда:
 | Узел / Устройство | Интерфейс | IP-адрес / Маска | Назначение |
 |---|---|---|---|
-| **TRex VM** | `ens33` | `10.15.26.15/24` | Управление: Web UI (порт 8080), SSH (порт 22). |
+| **TRex VM** | `ens33 / eth0` | `<IP_СЕРВЕРА>/24` | Управление: Web UI (порт 8080), SSH (порт 22). |
 | **TRex VM** | `Port 0` (03:00.0) | `192.168.1.2/24` | Клиентский порт (эмуляция генерации запросов). |
 | **TRex VM** | `Port 1` (0b:00.0) | `172.10.1.2/24` | Серверный порт (эмуляция ответов сервисов). |
 | **NGFW** | `LAN` (eth1) | `192.168.1.1/24` | Входной шлюз для клиентов TRex. |
