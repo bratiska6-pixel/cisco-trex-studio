@@ -26,9 +26,9 @@ Cisco TRex — это высокопроизводительный генера�
 
 ```mermaid
 flowchart TD
-    subgraph VM ["Виртуальная машина t-rex (Ubuntu 22.04)"]
+    subgraph VM ["Виртуальная машина TRex (Ubuntu 22.04)"]
         subgraph Management ["Management Plane (Kernel Space)"]
-            ens33["ens33 (02:01.0)<br/>10.15.26.15/24<br/>Driver: e1000"]
+            ens33["ens33 (Management)<br/>&lt;IP_УПРАВЛЕНИЯ&gt;/24<br/>Driver: e1000 / vmxnet3"]
             KernelStack["Linux Kernel Network Stack<br/>SSH / Systemd / Netplan"]
             ens33 --> KernelStack
         end
@@ -64,7 +64,7 @@ flowchart TD
 * **RAM:** 8 ГБ (2 ГБ выделяется под HugePages DPDK, остальное — под стек ОС и кэш).
 * **Диск:** от 40 ГБ (SSD/NVMe).
 * **Сетевые адаптеры:**
-  1. `NIC 1` (Management): тип `e1000` или `VMXNET3`, сеть управления (10.15.26.0/24).
+  1. `NIC 1` (Management): тип `e1000` или `VMXNET3`, сеть управления (например, 192.168.10.0/24).
   2. `NIC 2` (TRex Port 0 - Client): тип `VMXNET3`, порт подключения к LAN/Ingress интерфейсу NGFW.
   3. `NIC 3` (TRex Port 1 - Server): тип `VMXNET3`, порт подключения к WAN/Egress интерфейсу NGFW.
 * **Требование к vSwitch/PortGroup в VMware:**
