@@ -1,0 +1,14 @@
+[Unit]
+Description=Cisco TRex Web GUI Dashboard (TRex Studio)
+After=network.target trex-engine.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/trex/webui
+ExecStart=/usr/bin/python3 /opt/trex/webui/app.py
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
