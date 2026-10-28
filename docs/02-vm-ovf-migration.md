@@ -125,7 +125,7 @@ sudo shutdown -h now
 
 ovftool --noSSLVerify \
   --diskMode=streamOptimized \
-  vi://root:P@ssw0rd@10.15.26.1/t-rex \
+  vi://<ESXI_USER>:<ESXI_PASSWORD>@<ESXI_HOST_IP>/<VM_NAME> \
   ./t-rex_appliance_v3.08.ova
 ```
 
@@ -153,7 +153,7 @@ ovftool /var/lib/vmware/Virtual\ Machines/t-rex/t-rex.vmx ./t-rex_appliance_v3.0
 
 ```bash
 # Передача на целевой сервер по SSH
-rsync -avP ./t-rex_appliance_v3.08.ova root@10.20.30.50:/tmp/
+rsync -avP ./t-rex_appliance_v3.08.ova root@<IP_ЦЕЛЕВОГО_ХОСТА>:/tmp/
 ```
 
 Либо загрузите файл через веб-интерфейс целевого гипервизора.
@@ -239,8 +239,8 @@ qm start 150
 
 ### 1. Подключение к ВМ по SSH:
 ```bash
-ssh user@<НОВЫЙ_IP_АДРЕС>
-# Пароль: xxXX1234 (или root)
+ssh <ИМЯ_ПОЛЬЗОВАТЕЛЯ>@<НОВЫЙ_IP_АДРЕС>
+# Пароль: ваш пароль учетной записи ОС Linux
 ```
 
 ### 2. Проверка PCI-адресов адаптеров:
