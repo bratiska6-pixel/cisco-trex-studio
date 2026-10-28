@@ -1,0 +1,181 @@
+# ⚡ Cisco TRex v3.08 & TRex Studio Web UI
+
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-Ubuntu%2022.04%20%7C%2024.04%20LTS-orange.svg)]()
+[![TRex Version](https://img.shields.io/badge/Cisco%20TRex-v3.08%20(ASTF)-green.svg)]()
+[![Web UI](https://img.shields.io/badge/UI-TRex%20Studio%20(Flask%20%2B%20Chart.js)-purple.svg)]()
+[![DPDK](https://img.shields.io/badge/Engine-DPDK%20HugePages-red.svg)]()
+
+> **Готовое решение «из коробки»** для развертывания высокопроизводительного аппаратного/виртуального генератора трафика **Cisco TRex** с современной веб-панелью управления **TRex Studio**, автоматическим установщиком и комплектом из 5 методик испытаний (ПМИ) межсетевых экранов нового поколения (NGFW).
+
+---
+
+## 🎯 Основные возможности
+
+* **Высокая производительность:** Генерация реалистичного трафика L4–L7 на скорости интерфейса (до миллионов CPS и десятков Гбит/с) за счет **DPDK** и выделенной памяти **HugePages** в пространстве пользователя.
+* **Режим ASTF (Advanced Stateful Traffic Generator):** Эмуляция полноценного двустороннего TCP/UDP трафика с имитацией клиентов (Client Pool) и серверов (Server Pool) через тестируемый межсетевой экран.
+* **Веб-интерфейс TRex Studio (порт 8080):**
+  * Интерактивный Dashboard с графиками Tx/Rx, CPS, активных сессий, задержек и джиттера в реальном времени.
+  * Конструктор и валидатор проверки **DPI (Deep Packet Inspection)**: генерация сессий с кастомными доменами TLS 1.2 SNI (Telegram, VK, YouTube) и HTTP Host.
+  * Управление сетевыми адресами портов и ARP-запросами в один клик.
+  * Авторизация через системную подсистему Linux PAM (вход под реальными пользователями ОС).
+* **Автоматизация «в 1 клик»:** Скрипт `install.sh` настраивает Hugepages, загружает драйверы `uio_pci_generic`, скачивает движок TRex v3.08 и активирует службы systemd.
+* **5 готовых программ демонстраций (ПМИ):** Готовые сценарии для демонстрации заказчикам возможностей DPI, предельного CPS, корпоративного трафика и стабильности NGFW.
+
+---
+
+## 🏛 Архитектура решения
+
+```mermaid
+graph TD
+    subgraph Browser ["Рабочее место инженера / Заказчик"]
+        UI["Web UI: http://&lt;IP&gt;:8080<br/>Dashboard / DPI Checker / Real-time Charts"]
+    end
+
+    subgraph Host ["Сервер генератора трафика (Ubuntu 22.04 LTS)"]
+        subgraph WebLayer ["Служба: trex-webui.service"]
+            Flask["Flask REST API Backend (app.py)<br/>PAM Auth / Telemetry Cache"]
+        end
+
+        subgraph EngineLayer ["Служба: trex-engine.service"]
+            Engine["Cisco TRex ASTF (_t-rex-64)<br/>RPC TCP 4500 / Pub TCP 4501"]
+            DPDK["DPDK Ring Buffers<br/>HugePages (2048 MB)"]
+        end
+
+        Port0["Port 0 (Client Side)<br/>IP: 192.168.1.2<br/>GW: 192.168.1.1"]
+        Port1["Port 1 (Server Side)<br/>IP: 172.10.1.2<br/>GW: 172.10.1.1"]
+    end
+
+    subgraph DUT ["Тестируемое устройство (NGFW / Шлюз)"]
+        LAN["LAN: 192.168.1.1"]
+        WAN["WAN: 172.10.1.1"]
+        DPI_Module["Модуль инспекции: DPI / IPS / Anti-DDoS / NAT"]
+        LAN <--> DPI_Module <--> WAN
+    end
+
+    UI <==> |HTTP / JSON REST API| Flask
+    Flask <==> |TRex RPC API (Port 4500)| Engine
+    Engine <==> DPDK
+    DPDK <==> Port0
+    DPDK <==> Port1
+    Port0 <==> |Эмуляция Клиентов (16.0.0.0/8)| LAN
+    Port1 <==> |Эмуляция Серверов (48.0.0.0/8)| WAN
+```
+
+---
+
+## ⚙️ Системные требования
+
+| Ресурс | Минимальные | Рекомендуемые (для стресс-тестов) |
+|---|---|---|
+| **ОС** | Ubuntu 22.04 / 24.04 LTS (x86_64) | Ubuntu 22.04 LTS |
+| **CPU** | 4 ядра (vCPU) | 8+ ядер с частотой от 3.0 ГГц |
+| **RAM** | 4 ГБ (2 ГБ под HugePages) | 8–16 ГБ RAM |
+| **Диск** | 20 ГБ свободного места | SSD / NVMe |
+| **Сетевые карты** | 3 адаптера: 1 для Management + 2 для DPDK (VMXNET3, Intel e1000/i40e/ixgbe, Mellanox) |
+
+---
+
+## 🚀 Быстрый старт (Установка за 3 шага)
+
+### Шаг 1. Клонирование репозитория
+```bash
+git clone https://github.com/<YOUR_USERNAME>/cisco-trex-studio.git
+cd cisco-trex-studio
+```
+
+### Шаг 2. Автоматическая установка
+Запустите скрипт автоматической настройки:
+```bash
+sudo ./install.sh
+```
+Скрипт автоматически:
+1. Установит необходимые пакеты и Python-модули.
+2. Выделит 2 ГБ памяти HugePages (`vm.nr_hugepages=1024`) и смонтирует `/mnt/huge`.
+3. Загрузит драйвер пространства пользователя `uio_pci_generic`.
+4. Скачает и распакует дистрибутив **Cisco TRex v3.08** в `/opt/trex/v3.08`.
+5. Развернет код **TRex Studio** в `/opt/trex/webui` и установит службы systemd.
+
+### Шаг 3. Привязка сетевых карт к DPDK и первый запуск
+1. Определите PCI-адреса портов генерации (два свободных адаптера):
+   ```bash
+   cd /opt/trex/v3.08
+   sudo python3 dpdk_nic_bind.py --status
+   ```
+2. Отключите интерфейсы в ядре и привяжите их к DPDK:
+   ```bash
+   # Например, для портов 03:00.0 и 0b:00.0:
+   sudo python3 dpdk_nic_bind.py --bind=uio_pci_generic 03:00.0 0b:00.0
+   ```
+3. Отредактируйте `/etc/trex_cfg.yaml`, указав ваши PCI-адреса и шлюзы:
+   ```bash
+   sudo nano /etc/trex_cfg.yaml
+   ```
+4. Запустите службы генератора и веб-панели:
+   ```bash
+   sudo systemctl restart trex-engine.service
+   sudo systemctl restart trex-webui.service
+   ```
+5. Откройте в браузере:  
+   👉 **`http://<IP_СЕРВЕРА>:8080/`**  
+   *(Логин и пароль: ваша учетная запись пользователя в системе Ubuntu)*.
+
+---
+
+## 🌐 Схема стенда и настройка NGFW
+
+Чтобы трафик свободно циркулировал между клиентами и серверами через ваш межсетевой экран:
+
+1. **Статическая маршрутизация на NGFW:**
+   * Сеть **`16.0.0.0/8`** (клиентский пул TRex) направить на шлюз `192.168.1.2` (Port 0 TRex).
+   * Сеть **`48.0.0.0/8`** (серверный пул TRex) направить на шлюз `172.10.1.2` (Port 1 TRex).
+2. **Исключение из NAT (No-NAT / Bypass NAT):**
+   * Создайте правило: трафик с источником `16.0.0.0/8` на назначение `48.0.0.0/8` пропускать **БЕЗ трансляции адресов (No-NAT)**.
+3. **Разрешающие правила Firewall:**
+   * Создайте разрешающее правило для зон LAN -> WAN для портов HTTP (80), HTTPS (443) и нужных протоколов.
+4. **Контроль приложений (DPI):**
+   * Для тестирования блокировок заблокируйте категорию или приложение (например, `Telegram`).
+   * В веб-интерфейсе TRex Studio во вкладке **«Проверка DPI»** запустите тест домена `web.telegram.org` и зафиксируйте статус **BLOCKED BY DPI**.
+
+---
+
+## 📑 Каталог демонстрационных программ (ПМИ)
+
+В папке [`templates/`](templates/README.md) содержатся готовые методики испытаний:
+* **[01-demo-throughput-cps-stress.md](templates/01-demo-throughput-cps-stress.md)** — Предельная пропускная способность L7 и максимальный CPS.
+* **[02-demo-dpi-app-blocking.md](templates/02-demo-dpi-app-blocking.md)** — Проверка глубокого анализа пакетов (DPI) и блокировка приложений (Telegram, VK, RuTracker).
+* **[03-demo-enterprise-traffic-mix-sfr.md](templates/03-demo-enterprise-traffic-mix-sfr.md)** — Реалистичный корпоративный трафик (Enterprise SFR Mix: Web, Mail, DNS, Video).
+* **[04-demo-ngfw-latency-jitter-qos.md](templates/04-demo-ngfw-latency-jitter-qos.md)** — Измерение задержек (Latency), джиттера и проверка шейперов QoS при инспекции IPS.
+* **[05-demo-stability-longterm-soak.md](templates/05-demo-stability-longterm-soak.md)** — Суточный стресс-тест на надежность (Soak / Longevity Test).
+
+---
+
+## 📚 Подробная документация
+
+* 📖 [Развертывание в режиме CLI (без Web)](docs/01-deployment-cli.md)
+* 📦 [Руководство по переносу ВМ (OVF/OVA экспорт и импорт)](docs/02-vm-ovf-migration.md)
+* 🖥 [Руководство администратора веб-панели TRex Studio](docs/03-webui-admin-guide.md)
+
+---
+
+## 🛠 Полезные команды управления
+
+```bash
+# Проверка статуса служб
+sudo systemctl status trex-engine.service trex-webui.service
+
+# Просмотр логов в реальном времени
+sudo journalctl -u trex-webui.service -f
+sudo journalctl -u trex-engine.service -f
+
+# Интерактивная консоль TRex CLI (если требуется)
+cd /opt/trex/v3.08
+sudo ./trex-console --astf
+```
+
+---
+
+## 📄 Лицензия
+
+Проект распространяется под открытой лицензией **Apache 2.0**. Подробности в файле [LICENSE](LICENSE).
+Cisco TRex является зарегистрированным товарным знаком Cisco Systems, Inc.
