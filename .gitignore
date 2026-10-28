@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+*$py.class
+.secret_key
+*.log
+*.pcap
+reports_history.json
+.DS_Store
+.vscode/
+.idea/
