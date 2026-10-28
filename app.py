@@ -537,7 +537,7 @@ LOGIN_PAGE = """<!DOCTYPE html>
         </form>
 
         <div class="footer-note">
-            Сервер: <strong>t-rex (10.15.26.15)</strong> • Защищённый доступ
+            Сервер: <strong>TRex ASTF Studio</strong> • Защищённый доступ
         </div>
     </div>
 </body>
@@ -880,7 +880,7 @@ HTML_PAGE = """<!DOCTYPE html>
             <div class="brand-sub">
                 <span>🕒 <strong id="sys-clock" style="color:#fff;">00:00:00</strong></span>
                 <span>•</span>
-                <span>🌐 Хост: <strong>10.15.26.15</strong></span>
+                <span>🌐 Платформа: <strong>TRex ASTF v3.08</strong></span>
                 <span>•</span>
                 <span>Комплекс испытаний NGFW / DPI</span>
             </div>
@@ -1119,7 +1119,7 @@ HTML_PAGE = """<!DOCTYPE html>
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
                     <div>
                         <h4 style="font-size:1.05rem;">👥 Пользователи операционной системы</h4>
-                        <p style="font-size:0.8rem; color:var(--text-muted);">Учётные записи Linux на сервере t-rex</p>
+                        <p style="font-size:0.8rem; color:var(--text-muted);">Системные учётные записи Linux (PAM)</p>
                     </div>
                     <button onclick="loadUsers()" class="btn-apple btn-ghost" style="padding:5px 12px; font-size:0.78rem;">🔄 Обновить</button>
                 </div>
@@ -2049,7 +2049,7 @@ def export_report():
 > **Детали:** {target.get('verdict_detail', target.get('verdict', ''))}
 
 ---
-*Сформировано автоматически: Комплекс тестирования Cisco TRex ASTF Studio на узле t-rex (10.15.26.15)*
+*Сформировано автоматически: Комплекс тестирования Cisco TRex ASTF Studio*
 """
     filename = f"TRex_Report_{target.get('id', 'latest')}.md"
     return app.response_class(
