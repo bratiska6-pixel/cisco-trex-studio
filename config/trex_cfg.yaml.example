@@ -1,0 +1,20 @@
+# Cisco TRex v3.08 ASTF Mode Configuration File
+# Place this file at: /etc/trex_cfg.yaml
+#
+# Replace PCI interfaces (e.g., '03:00.0', '0b:00.0') with your DPDK-bound network cards
+# Check PCI addresses using: ./dpdk_nic_bind.py --status
+
+- version: 2
+  interfaces: ['03:00.0', '0b:00.0']
+  port_info:
+      - ip: 192.168.1.2
+        default_gw: 192.168.1.1
+      - ip: 172.10.1.2
+        default_gw: 172.10.1.1
+
+  platform:
+      master_thread_id: 0
+      latency_thread_id: 1
+      dual_if:
+        - socket: 0
+          threads: [2, 3]
