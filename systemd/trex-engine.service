@@ -1,0 +1,16 @@
+[Unit]
+Description=Cisco TRex Traffic Generator Engine (ASTF)
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/trex/v3.08
+ExecStart=/opt/trex/start_trex_engine.sh
+Restart=on-failure
+RestartSec=5
+LimitMEMLOCK=infinity
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target
